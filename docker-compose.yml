@@ -1,0 +1,42 @@
+# Local WordPress for plugin development. The plugin dir is mounted straight into wp-content,
+# so PHP edits are live on refresh. The container reaches the dev ChattyPage API on the host
+# via host.docker.internal (add to wp-config via CHATTYPAGE_API_BASE below).
+#
+#   docker compose up -d
+#   open http://localhost:8080  (install wizard on first run)
+#
+# After install, the API base for the dev stack is preconfigured through WORDPRESS_CONFIG_EXTRA.
+services:
+  wordpress:
+    image: wordpress:6.9-php8.3-apache
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'CHATTYPAGE_API_BASE', 'http://host.docker.internal:3000' );
+        define( 'CHATTYPAGE_APP_BASE', 'http://localhost:5180' );
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - wp_data:/var/www/html
+      - ./chattypage:/var/www/html/wp-content/plugins/chattypage
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  wp_data:
+  db_data:

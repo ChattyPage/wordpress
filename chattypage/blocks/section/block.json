@@ -1,0 +1,22 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "chattypage/section",
+    "title": "ChattyPage Section",
+    "category": "design",
+    "icon": "layout",
+    "description": "An AI-designed section from your ChattyPage account. Rendered inline and kept in sync automatically.",
+    "keywords": ["chattypage", "section", "ai", "design"],
+    "textdomain": "chattypage",
+    "attributes": {
+        "sectionId": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    "supports": {
+        "html": false,
+        "align": ["wide", "full"]
+    },
+    "editorScript": "chattypage-section-block"
+}
