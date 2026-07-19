@@ -145,4 +145,14 @@ class ChattyPage_Api_Client {
 	public static function me() {
 		return self::get( 'me' );
 	}
+
+	/**
+	 * Ask ChattyPage to redesign one page of this site as a new section (queued generation in
+	 * the connected account; uses the account's credits).
+	 *
+	 * @return array{queued:bool,blockId:string}|WP_Error
+	 */
+	public static function redesign( $url ) {
+		return self::post( 'redesign', array( 'url' => $url ) );
+	}
 }

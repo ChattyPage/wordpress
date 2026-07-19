@@ -18,6 +18,7 @@ class ChattyPage_Admin {
 		add_action( 'admin_post_chattypage_connect', array( __CLASS__, 'handle_connect' ) );
 		add_action( 'admin_post_chattypage_disconnect', array( __CLASS__, 'handle_disconnect' ) );
 		add_action( 'admin_post_chattypage_refresh', array( __CLASS__, 'handle_refresh' ) );
+		add_action( 'admin_post_chattypage_redesign', array( __CLASS__, 'handle_redesign' ) );
 	}
 
 	public static function register_menu() {
@@ -67,6 +68,20 @@ class ChattyPage_Admin {
 		exit;
 	}
 
+	public static function handle_redesign() {
+		check_admin_referer( 'chattypage_redesign' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Insufficient permissions.', 'chattypage' ) );
+		}
+		$url    = isset( $_POST['chattypage_url'] ) ? esc_url_raw( (string) wp_unslash( $_POST['chattypage_url'] ) ) : '';
+		$result = ChattyPage_Api_Client::redesign( $url );
+		$query  = is_wp_error( $result )
+			? array( 'page' => 'chattypage', 'cp_error' => rawurlencode( $result->get_error_message() ) )
+			: array( 'page' => 'chattypage', 'cp_redesign' => '1' );
+		wp_safe_redirect( add_query_arg( $query, admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
 	public static function render_page() {
 		$settings  = ChattyPage_Api_Client::settings();
 		$connected = ChattyPage_Api_Client::is_connected();
@@ -80,6 +95,8 @@ class ChattyPage_Admin {
 				<div class="notice notice-success"><p><?php esc_html_e( 'Connected to ChattyPage. Your sections are ready to place.', 'chattypage' ); ?></p></div>
 			<?php elseif ( isset( $_GET['cp_refreshed'] ) ) : ?>
 				<div class="notice notice-success"><p><?php esc_html_e( 'Section caches refreshed.', 'chattypage' ); ?></p></div>
+			<?php elseif ( isset( $_GET['cp_redesign'] ) ) : ?>
+				<div class="notice notice-success"><p><?php esc_html_e( 'Redesign started. In a minute or two your new section appears below and in your ChattyPage editor, ready to place and fine-tune.', 'chattypage' ); ?></p></div>
 			<?php endif; ?>
 
 			<?php if ( ! $connected ) : ?>
@@ -120,6 +137,24 @@ class ChattyPage_Admin {
 						<?php esc_html_e( 'Design sections in ChattyPage', 'chattypage' ); ?>
 					</a>
 				</p>
+
+				<div class="card" style="max-width:640px;margin:16px 0 24px">
+					<h2><?php esc_html_e( 'Redesign a page with AI', 'chattypage' ); ?></h2>
+					<p><?php esc_html_e( 'Pick one of your pages (or paste any public URL) and ChattyPage designs a modern section from its real content. Uses credits from your account.', 'chattypage' ); ?></p>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<?php wp_nonce_field( 'chattypage_redesign' ); ?>
+						<input type="hidden" name="action" value="chattypage_redesign" />
+						<p>
+							<select name="chattypage_url" class="regular-text" style="width:100%">
+								<option value="<?php echo esc_attr( home_url( '/' ) ); ?>"><?php esc_html_e( 'Homepage', 'chattypage' ); ?></option>
+								<?php foreach ( get_pages( array( 'number' => 30 ) ) as $p ) : ?>
+									<option value="<?php echo esc_attr( get_permalink( $p ) ); ?>"><?php echo esc_html( $p->post_title ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</p>
+						<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Redesign with ChattyPage', 'chattypage' ); ?></button></p>
+					</form>
+				</div>
 
 				<h2><?php esc_html_e( 'Your sections', 'chattypage' ); ?></h2>
 				<?php if ( is_wp_error( $sections ) ) : ?>
