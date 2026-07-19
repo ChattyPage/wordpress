@@ -27,6 +27,28 @@ services:
     depends_on:
       - db
 
+  # One-off wp-cli runs (scripts/e2e-local.sh): shares the WP volume + db network.
+  cli:
+    image: wordpress:cli-php8.3
+    profiles: ["tools"]
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      # wp-config-docker.php evaluates this at RUNTIME per process — the cli container needs the
+      # same overrides as the apache one, or wp-cli runs fall back to the production API base.
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'CHATTYPAGE_API_BASE', 'http://host.docker.internal:3000' );
+        define( 'CHATTYPAGE_APP_BASE', 'http://localhost:5180' );
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - wp_data:/var/www/html
+      - ./chattypage:/var/www/html/wp-content/plugins/chattypage
+    depends_on:
+      - db
+
   db:
     image: mariadb:11
     environment:
