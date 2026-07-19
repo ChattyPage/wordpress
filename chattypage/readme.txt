@@ -4,7 +4,7 @@ Tags: ai, sections, design, page builder, elementor
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,11 @@ No. Sections are cached in your WordPress database and served as inline HTML. Th
 Your pages simply stop rendering the ChattyPage sections. Nothing else on your site is touched. Your designs stay safe in your ChattyPage account.
 
 == Changelog ==
+
+= 0.2.0 =
+* Site design takeover: let ChattyPage design your whole site (header, footer, article typography) while your pages, posts, menus, and plugins keep working. Your current theme stays installed; switch back anytime.
+* Redesign a page with AI from wp-admin.
+* Bundled Tailwind runtime (no external CDN) with a scoped reset, so sections render exactly as designed without touching the rest of your site.
 
 = 0.1.0 =
 * First release: connect flow, section browser, Gutenberg block, Elementor widget, shortcode, automatic cache refresh on publish.

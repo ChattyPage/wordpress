@@ -19,6 +19,7 @@ class ChattyPage_Admin {
 		add_action( 'admin_post_chattypage_disconnect', array( __CLASS__, 'handle_disconnect' ) );
 		add_action( 'admin_post_chattypage_refresh', array( __CLASS__, 'handle_refresh' ) );
 		add_action( 'admin_post_chattypage_redesign', array( __CLASS__, 'handle_redesign' ) );
+		add_action( 'admin_post_chattypage_takeover', array( __CLASS__, 'handle_takeover' ) );
 	}
 
 	public static function register_menu() {
@@ -82,6 +83,16 @@ class ChattyPage_Admin {
 		exit;
 	}
 
+	public static function handle_takeover() {
+		check_admin_referer( 'chattypage_takeover' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Insufficient permissions.', 'chattypage' ) );
+		}
+		ChattyPage_Template::set_enabled( ! empty( $_POST['chattypage_takeover_on'] ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'chattypage', 'cp_takeover' => '1' ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
 	public static function render_page() {
 		$settings  = ChattyPage_Api_Client::settings();
 		$connected = ChattyPage_Api_Client::is_connected();
@@ -97,6 +108,8 @@ class ChattyPage_Admin {
 				<div class="notice notice-success"><p><?php esc_html_e( 'Section caches refreshed.', 'chattypage' ); ?></p></div>
 			<?php elseif ( isset( $_GET['cp_redesign'] ) ) : ?>
 				<div class="notice notice-success"><p><?php esc_html_e( 'Redesign started. In a minute or two your new section appears below and in your ChattyPage editor, ready to place and fine-tune.', 'chattypage' ); ?></p></div>
+			<?php elseif ( isset( $_GET['cp_takeover'] ) ) : ?>
+				<div class="notice notice-success"><p><?php esc_html_e( 'Saved. Reload your site to see the change.', 'chattypage' ); ?></p></div>
 			<?php endif; ?>
 
 			<?php if ( ! $connected ) : ?>
@@ -137,6 +150,20 @@ class ChattyPage_Admin {
 						<?php esc_html_e( 'Design sections in ChattyPage', 'chattypage' ); ?>
 					</a>
 				</p>
+
+				<div class="card" style="max-width:640px;margin:16px 0 24px">
+					<h2><?php esc_html_e( 'Site design', 'chattypage' ); ?></h2>
+					<p><?php esc_html_e( 'Let ChattyPage design your whole site: your pages and posts keep their content, wrapped in the header, footer, and typography from your ChattyPage design. Your current theme stays installed; switch back anytime.', 'chattypage' ); ?></p>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<?php wp_nonce_field( 'chattypage_takeover' ); ?>
+						<input type="hidden" name="action" value="chattypage_takeover" />
+						<label style="display:block;margin:8px 0 12px">
+							<input type="checkbox" name="chattypage_takeover_on" value="1" <?php checked( ChattyPage_Template::is_enabled() ); ?> />
+							<?php esc_html_e( 'Use my ChattyPage design for the whole site', 'chattypage' ); ?>
+						</label>
+						<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Save', 'chattypage' ); ?></button></p>
+					</form>
+				</div>
 
 				<div class="card" style="max-width:640px;margin:16px 0 24px">
 					<h2><?php esc_html_e( 'Redesign a page with AI', 'chattypage' ); ?></h2>

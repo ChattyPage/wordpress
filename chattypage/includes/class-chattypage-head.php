@@ -21,9 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class ChattyPage_Head {
 
-	const RESET_TRANSIENT = 'chattypage_reset_css';
-	const RESET_TTL       = DAY_IN_SECONDS;
-
 	public static function init() {
 		add_action( 'wp_head', array( __CLASS__, 'print_assets' ), 5 );
 	}
@@ -37,31 +34,27 @@ class ChattyPage_Head {
 		echo '<script src="' . esc_url( $tailwind ) . '"></script>' . "\n";
 		echo '<script>tailwind.config = { corePlugins: { preflight: false } };</script>' . "\n";
 
-		$reset = self::reset_css();
-		if ( '' !== $reset ) {
-			// Our own stylesheet from the connected service — printed verbatim like the sections.
-			echo '<style id="chattypage-reset">' . $reset . '</style>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		self::print_style_fragment( 'reset-css', 'chattypage-reset' );
+
+		// The article typography ships only when the chrome takeover renders content pages.
+		if ( class_exists( 'ChattyPage_Template' ) && ChattyPage_Template::is_enabled() ) {
+			self::print_style_fragment( 'article-css', 'chattypage-article-css' );
 		}
 	}
 
-	/** The scoped mini-reset, cache-first (refreshed by the same webhook flush as sections). */
-	public static function reset_css() {
-		$cached = get_transient( self::RESET_TRANSIENT );
-		if ( false !== $cached ) {
-			return (string) $cached;
-		}
-		$css = ChattyPage_Api_Client::get( 'template/reset-css' );
-		if ( is_wp_error( $css ) || ! is_string( $css ) ) {
-			set_transient( self::RESET_TRANSIENT, '', 5 * MINUTE_IN_SECONDS ); // negative-cache
-			return '';
+	/** Print one cached CSS fragment as an inline <style> (fragments come from the Renderer funnel). */
+	private static function print_style_fragment( $fragment, $element_id ) {
+		$css = ChattyPage_Renderer::fragment( $fragment );
+		if ( '' === $css ) {
+			return;
 		}
 		// Defense in depth: a stylesheet must never be able to close its <style> tag.
 		$css = str_ireplace( '</style', '', $css );
-		set_transient( self::RESET_TRANSIENT, $css, self::RESET_TTL );
-		return $css;
+		echo '<style id="' . esc_attr( $element_id ) . '">' . $css . '</style>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	public static function flush() {
-		delete_transient( self::RESET_TRANSIENT );
+		// Fragment transients are owned by the Renderer; kept for back-compat with old installs.
+		delete_transient( 'chattypage_reset_css' );
 	}
 }

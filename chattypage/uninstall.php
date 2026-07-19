@@ -16,5 +16,9 @@ foreach ( $known as $id ) {
 }
 delete_transient( 'chattypage_sections_index' );
 delete_transient( 'chattypage_reset_css' );
+foreach ( array( 'header', 'footer', 'article-css', 'reset-css' ) as $fragment ) {
+	delete_transient( 'chattypage_fragment_' . $fragment );
+}
 delete_option( 'chattypage_cached_sections' );
 delete_option( 'chattypage_settings' );
+delete_option( 'chattypage_takeover' );

@@ -66,6 +66,33 @@ class ChattyPage_Renderer {
 		return '<div class="chattypage-section" data-chattypage-section="' . esc_attr( $section_id ) . '">' . $html . '</div>';
 	}
 
+	// ── Template fragments (chrome takeover) ─────────────────────────────────────────────────
+	// The same cache-first contract as sections, for /integration/v1/template/:name. The
+	// Renderer is the plugin's ONE caching funnel: sections + template fragments both live
+	// here, and flush_all() is the one place the webhook busts everything.
+
+	const FRAGMENT_PREFIX = 'chattypage_fragment_';
+	const FRAGMENT_NAMES  = array( 'header', 'footer', 'article-css', 'reset-css' );
+
+	/** A cached template fragment ('' on failure — a broken fragment never breaks the page). */
+	public static function fragment( $name ) {
+		if ( ! in_array( $name, self::FRAGMENT_NAMES, true ) || ! ChattyPage_Api_Client::is_connected() ) {
+			return '';
+		}
+		$key    = self::FRAGMENT_PREFIX . $name;
+		$cached = get_transient( $key );
+		if ( false !== $cached ) {
+			return (string) $cached;
+		}
+		$body = ChattyPage_Api_Client::get( 'template/' . $name );
+		if ( is_wp_error( $body ) || ! is_string( $body ) ) {
+			set_transient( $key, '', 5 * MINUTE_IN_SECONDS ); // negative-cache
+			return '';
+		}
+		set_transient( $key, $body, self::CACHE_TTL );
+		return $body;
+	}
+
 	/** Drop specific sections' caches (webhook refresh), or all when $ids is empty. */
 	public static function flush( array $ids ) {
 		if ( empty( $ids ) ) {
@@ -88,6 +115,9 @@ class ChattyPage_Renderer {
 		}
 		delete_option( self::INDEX_OPTION );
 		delete_transient( 'chattypage_sections_index' );
+		foreach ( self::FRAGMENT_NAMES as $name ) {
+			delete_transient( self::FRAGMENT_PREFIX . $name );
+		}
 		ChattyPage_Head::flush();
 	}
 

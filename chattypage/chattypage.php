@@ -3,7 +3,7 @@
  * Plugin Name:       ChattyPage Sections
  * Plugin URI:        https://chattypage.com/en/wordpress/
  * Description:       AI-designed sections for your WordPress site. Design in ChattyPage, place anywhere with a shortcode, block, or Elementor widget. Sections stay in sync automatically.
- * Version:           0.1.0
+ * Version:           0.2.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            ChattyPage
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CHATTYPAGE_VERSION', '0.1.0' );
+define( 'CHATTYPAGE_VERSION', '0.2.0' );
 define( 'CHATTYPAGE_PLUGIN_FILE', __FILE__ );
 define( 'CHATTYPAGE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CHATTYPAGE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -39,12 +39,14 @@ require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-api-client.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-renderer.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-rest.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-head.php';
+require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-template.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-shortcode.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-gutenberg.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-admin.php';
 
 ChattyPage_Rest::init();
 ChattyPage_Head::init();
+ChattyPage_Template::init();
 ChattyPage_Shortcode::init();
 ChattyPage_Gutenberg::init();
 ChattyPage_Admin::init();

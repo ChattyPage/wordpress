@@ -46,13 +46,20 @@ See the [terms](https://chattypage.com/terms) and [privacy policy](https://chatt
 | Path | Role |
 |---|---|
 | `chattypage/` | the plugin as shipped (WP.org SVN `trunk`) |
-| `chattypage/includes/class-chattypage-api-client.php` | all calls to the `/integration/v1/*` API (bearer token) |
-| `chattypage/includes/class-chattypage-renderer.php` | single render funnel: transient cache → server-side fetch → inline HTML |
+| `chattypage/includes/class-chattypage-api-client.php` | transport: all calls to the `/integration/v1/*` API (bearer token) |
+| `chattypage/includes/class-chattypage-renderer.php` | THE caching funnel: section html + template fragments (transients; `flush_all` = the webhook-bust point) |
+| `chattypage/includes/class-chattypage-head.php` | head assets: bundled Tailwind (preflight off) + scoped reset + article typography |
+| `chattypage/includes/class-chattypage-template.php` + `templates/takeover.php` | the site-design takeover (`template_include`; owner's theme stays active, rollback = toggle) |
 | `chattypage/includes/class-chattypage-rest.php` | `/wp-json/chattypage/v1/refresh` (HMAC webhook target) + `/sections` (picker feed) |
-| `chattypage/includes/class-chattypage-admin.php` | connect screen, section browser, redesign card, cache controls |
+| `chattypage/includes/class-chattypage-admin.php` | connect screen, site-design toggle, redesign card, section browser, cache controls |
 | shortcode + `chattypage/blocks/section` + Elementor widget | three placements over the same renderer output |
 | `docker-compose.yml` | local WordPress (:8080) with the plugin mounted |
 | `scripts/e2e-local.sh` | end-to-end harness against a local ChattyPage dev stack |
+
+The mental model: **WordPress owns all pages, posts, URLs, menus, and content; ChattyPage owns
+the design.** Design HTML is pulled server-to-server and cached locally; publishing in
+ChattyPage sends a signed ping that busts the caches. No iframes, no client-side fetching, no
+page mirroring.
 
 Publishing in ChattyPage triggers a signed webhook to `/refresh`, which busts the section
 transients, so connected sites update within one request.
