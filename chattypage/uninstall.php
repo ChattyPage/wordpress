@@ -15,5 +15,6 @@ foreach ( $known as $id ) {
 	}
 }
 delete_transient( 'chattypage_sections_index' );
+delete_transient( 'chattypage_reset_css' );
 delete_option( 'chattypage_cached_sections' );
 delete_option( 'chattypage_settings' );

@@ -88,6 +88,7 @@ class ChattyPage_Renderer {
 		}
 		delete_option( self::INDEX_OPTION );
 		delete_transient( 'chattypage_sections_index' );
+		ChattyPage_Head::flush();
 	}
 
 	private static function remember( $section_id ) {

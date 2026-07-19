@@ -75,8 +75,8 @@ class ChattyPage_Api_Client {
 		}
 
 		$content_type = wp_remote_retrieve_header( $res, 'content-type' );
-		if ( is_string( $content_type ) && false !== strpos( $content_type, 'text/html' ) ) {
-			return $raw; // fragment endpoint: the body IS the payload
+		if ( is_string( $content_type ) && 0 === strpos( $content_type, 'text/' ) ) {
+			return $raw; // fragment endpoints (text/html, text/css): the body IS the payload
 		}
 
 		$decoded = json_decode( $raw, true );

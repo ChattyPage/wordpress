@@ -38,11 +38,13 @@ if ( ! defined( 'CHATTYPAGE_APP_BASE' ) ) {
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-api-client.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-renderer.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-rest.php';
+require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-head.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-shortcode.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-gutenberg.php';
 require_once CHATTYPAGE_PLUGIN_DIR . 'includes/class-chattypage-admin.php';
 
 ChattyPage_Rest::init();
+ChattyPage_Head::init();
 ChattyPage_Shortcode::init();
 ChattyPage_Gutenberg::init();
 ChattyPage_Admin::init();
