@@ -49,7 +49,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</article>
 		<?php
 		if ( 'post' === get_post_type() && ( comments_open() || get_comments_number() ) ) {
+			// Comments live in the same reading column + typography as the article body.
+			echo '<div class="chatty-article"><div class="chatty-article__body">';
 			comments_template();
+			echo '</div></div>';
 		}
 	endwhile;
 	?>
